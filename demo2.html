@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>Compliance Dashboard</title>
+    <script type="text/javascript" src="d3.v2.min.js"></script>
+    <script type="text/javascript" src="jquery-1.8.2.min.js"></script>
+    <style type="text/css">
+
+
+
+      
+          svg {
+            width: 1100px;
+            height: 650px;
+            border: solid 1px #ccc;
+            background: #00000;
+          }
+
+          line {
+            stroke: brown;
+            stroke-dasharray: 4,2;
+          }
+
+          path {
+            fill: #ccc;
+            stroke: #fff;
+          }
+
+/*.Blues .q0-3{fill:rgb(222,235,247)}
+.Blues .q1-3{fill:rgb(158,202,225)}
+.Blues .q2-3{fill:rgb(49,130,189)}
+.Blues .q0-4{fill:rgb(239,243,255)}
+.Blues .q1-4{fill:rgb(189,215,231)}
+.Blues .q2-4{fill:rgb(107,174,214)}
+.Blues .q3-4{fill:rgb(33,113,181)}
+.Blues .q0-5{fill:rgb(239,243,255)}
+.Blues .q1-5{fill:rgb(189,215,231)}
+.Blues .q2-5{fill:rgb(107,174,214)}
+.Blues .q3-5{fill:rgb(49,130,189)}
+.Blues .q4-5{fill:rgb(8,81,156)}
+.Blues .q0-6{fill:rgb(239,243,255)}
+.Blues .q1-6{fill:rgb(198,219,239)}
+.Blues .q2-6{fill:rgb(158,202,225)}
+.Blues .q3-6{fill:rgb(107,174,214)}
+.Blues .q4-6{fill:rgb(49,130,189)}
+.Blues .q5-6{fill:rgb(8,81,156)}
+.Blues .q0-7{fill:rgb(239,243,255)}
+.Blues .q1-7{fill:rgb(198,219,239)}
+.Blues .q2-7{fill:rgb(158,202,225)}
+.Blues .q3-7{fill:rgb(107,174,214)}
+.Blues .q4-7{fill:rgb(66,146,198)}
+.Blues .q5-7{fill:rgb(33,113,181)}
+.Blues .q6-7{fill:rgb(8,69,148)}
+.Blues .q0-8{fill:rgb(247,251,255)}
+.Blues .q1-8{fill:rgb(222,235,247)}
+.Blues .q2-8{fill:rgb(198,219,239)}
+.Blues .q3-8{fill:rgb(158,202,225)}
+.Blues .q4-8{fill:rgb(107,174,214)}
+.Blues .q5-8{fill:rgb(66,146,198)}
+.Blues .q6-8{fill:rgb(33,113,181)}
+.Blues .q7-8{fill:rgb(8,69,148)}*/
+.Blues .q0-9{fill:rgb(247,251,255)}
+.Blues .q1-9{fill:rgb(222,235,247)}
+.Blues .q2-9{fill:rgb(198,219,239)}
+.Blues .q3-9{fill:rgb(158,202,225)}
+.Blues .q4-9{fill:rgb(107,174,214)}
+.Blues .q5-9{fill:rgb(66,146,198)}
+.Blues .q6-9{fill:rgb(33,113,181)}
+.Blues .q7-9{fill:rgb(8,81,156)}
+.Blues .q8-9{fill:rgb(8,48,107)}
+
+      </style>
+  </head>
+  <body>
+
+    <script type="text/javascript">
+
+// Our projection.
+var projection = d3.geo.mercator().scale(1050).translate([520,450]);
+//var xy = d3.geo.mercator().scale(1050).translate([520,450]);
+var path = d3.geo.path().projection(projection);
+
+//For buckeeting data into 9 colors
+quantize = d3.scale.quantile().domain([0, 20]).range(d3.range(9));
+
+var countries = d3.select("body")
+  .append("svg")
+    .attr("class","Blues")
+  .append("g")
+    .attr("id", "countries");
+
+var styles = ["rgb(247,251,255)",
+"rgb(222,235,247)",
+"rgb(198,219,239)",
+"rgb(158,202,225)",
+"rgb(107,174,214)",
+"rgb(66,146,198)",
+"rgb(33,113,181)",
+"rgb(8,81,156)",
+"rgb(8,48,107)"];
+
+
+
+
+function refresh() {
+
+  d3.json("countries.json", function(collection) {
+    var world = countries
+      .selectAll("path")
+        .data(collection.features);
+
+      world.enter().append("path")
+        .attr("d", path)
+        .style("fill", function (d) {return styles[Math.floor(Math.random() * 9)]; } )
+       // .attr("class",function (d) { return "q"+Math.floor(Math.random() * 10)+"-9"; } )
+      .append("title")
+        .text(function(d) { return d.properties.name; });
+
+    world.transition().duration(1000)
+      .style("fill", function (d) {return styles[Math.floor(Math.random() * 9)]; } )
+     // .attr("class",function (d) { return "q"+Math.floor(Math.random() * 10)+"-9"; } );
+
+  });
+
+  setTimeout(refresh, 2000);
+
+}
+
+refresh();
+
+
+
+
+    </script><p>
+    <div id="scale">scale: <span>500</span></div><p>
+    <div id="translate-x">translate.x: <span>480</span></div>
+    <div id="translate-y">translate.y: <span>250</span></div>
+
+  </body>
+</html>
