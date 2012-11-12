@@ -159,7 +159,7 @@ function refresh() {
             }
           } )
       .append("title")
-        .text(function(d) { return d.properties.name + ' \n\nRegulatory Focus: '+regfocus[d.id+'-'+$( "#year" ).text()]+'\nSoverign Exposure: $'+exposure[d.id+'-'+$( "#year" ).text()] ; });
+        .text(function(d) { return d.properties.name + ' \n\nRegulatory Focus: '+regfocus[d.id+'-'+$( "#year" ).text()]+'\nSovereign Exposure: $'+exposure[d.id+'-'+$( "#year" ).text()] ; });
 
       //Transition
       world.transition().duration(500)
@@ -176,15 +176,16 @@ function refresh() {
             default:
               return 0;
             } 
-          } )
-        .append("title")
-          .text(function(d) { return d.properties.name + ' \n\nRegulatory Focus: '+regfocus[d.id+'-'+$( "#year" ).text()]+'\nSoverign Exposure: $'+exposure[d.id+'-'+$( "#year" ).text()]; });
+          } );
+        
 
-        world.transition()
+        /*world.enter()
           .append("svg:rect")
-            .attr("x",100)
-            .attr("y",100)
-            .style("fill", "black");
+            .attr("x", 100)
+            .attr("y", 100)
+            .attr("height", 100)
+            .attr("width", 200)
+            .style("fill", "black");*/
 
     });
   });
