@@ -86,7 +86,7 @@
         <div class="hint">Switch between the following metrics to compare. </div>
         <div><select id="metric_dropdown">
           <optgroup label="Metrics">
-            <option value="Compliance">Regulatory Focus</option>
+            <option value="Compliance">Investment Compliance</option>
             <option value="Exposure">Sovereign Exposure</option>
           </optgroup>
         </select></div>
@@ -185,7 +185,7 @@ function load() {
           } )
       .append("title")
       	.attr("class","titles")
-        .text(function(d) { return d.properties.name + ' \n\nRegulatory Focus: '+regfocus[d.id+'-'+$( "#year" ).text()]+'\nSovereign Exposure: $'+formatNumber(exposure[d.id+'-'+$( "#year" ).text()]) ; });
+        .text(function(d) { return d.properties.name + ' \n\nInvestment Compliance: '+regfocus[d.id+'-'+$( "#year" ).text()]+'\nSovereign Exposure: $'+formatNumber(exposure[d.id+'-'+$( "#year" ).text()]) ; });
 
       	var thelegend = countries
       	  .selectAll("rect")
@@ -239,7 +239,7 @@ function refresh() {
 	var titles = countries.selectAll(".titles");
 	
 	titles.transition()
-		.text(function(d) { return d.properties.name + ' \n\nRegulatory Focus: '+regfocus[d.id+'-'+$( "#year" ).text()]+'\nSovereign Exposure: $'+formatNumber(exposure[d.id+'-'+$( "#year" ).text()]) ; });
+		.text(function(d) { return d.properties.name + ' \n\nInvestment Compliance: '+regfocus[d.id+'-'+$( "#year" ).text()]+'\nSovereign Exposure: $'+formatNumber(exposure[d.id+'-'+$( "#year" ).text()]) ; });
 	
 
 	var legend_boxes = countries.selectAll(".legend_boxes");
