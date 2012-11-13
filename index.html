@@ -12,20 +12,55 @@
 
 
         body {
-          background-image: url("texture-noise.png");
-          font-size: 14px;
-          font-family: "Helvetica Neue", Helvetica;
+          /*background-image: url("texture-noise.png");*/
+          font-family: Arial, Verdana, sans-serif, Myuen, Gulim;
+          font-size: 13px;
+          font-weight: bold;
+
         }
-      
+        
+        #logo {
+        	margin-right: 20px;
+        	width: 214px;
+        	height: 40px;
+			float:  left;
+        	background-image:  url("deloitte-logo-small.jpg");
+        	
+        }
+		
+		#year {
+			margin:  0px auto;
+			text-align: center;
+			font-size: 20px;
+			
+		}
+		
+		#slider {
+			margin:  0px auto;			
+			
+			
+		}      
+		
+		#compliance-header {
+			
+			
+		}
+		
+		#metric_dropdown {
+
+			
+		}
           .WorldMap {
-            width: 1100px;
+            width: 1300px;
             height: 650px;
-            border: solid 1px #ccc;
+            border: solid 0px #ccc;
             background: #00000;
+            margin: 0px auto;
+			display:  block;
           }
 
           .Legend {
-             width: 200px;
+            width: 200px;
             height: 200px;
             border: solid 1px #ccc;
             background: #00000;
@@ -36,29 +71,23 @@
             stroke-dasharray: 4,2;
           }
 
-          hint {
-
-
-          }
-
           path {
             fill: #ccc;
             stroke: black;
             stroke-width: .25px;
           }
 
-        
       </style>
   </head>
   <body>
 
-
-Compliance Dashboard
+<div id="logo"></div>
+<div id="compliance-header">Compliance Dashboard</div>
         <div class="hint">Switch between the following metrics to compare. </div>
         <div><select id="metric_dropdown">
           <optgroup label="Metrics">
             <option value="Compliance">Regulatory Focus</option>
-            <option value="Exposure">Soverign Exposure</option>
+            <option value="Exposure">Sovereign Exposure</option>
           </optgroup>
         </select></div>
         <div  id="year"></div>
@@ -78,16 +107,6 @@ var path = d3.geo.path().projection(projection);
 //For buckeeting data into 9 colors
 var quantize = d3.scale.quantile().domain([0, 100000000]).range(d3.range(9));
 
-
-
-
-/*var legend = d3.select("body")
-  .append("svg")
-    .attr("class","Legend")
-  .append("g")
-    .attr("id","items");
-*/
-
 //Color Styles
 var blue_styles = ["rgb(247,251,255)","rgb(222,235,247)","rgb(198,219,239)","rgb(158,202,225)",
 "rgb(107,174,214)","rgb(66,146,198)","rgb(33,113,181)","rgb(8,81,156)","rgb(8,48,107)"];
@@ -97,15 +116,21 @@ var red_styles = ["rgb(255,245,240)","rgb(254,224,210)","rgb(252,187,161)","rgb(
 
 //Formats number with commas
 function formatNumber(num) {
-  num = num.toString().split('.');
-  var ints = num[0].split('').reverse();
-  for (var out=[],len=ints.length,i=0; i < len; i++) {
-    if (i > 0 && (i % 3) === 0) out.push(',');
-    out.push(ints[i]);
-  }
-  out = out.reverse() && out.join('');
-  if (num.length === 2) out += '.' + num[1];
-  return out;
+	if (num == undefined){
+		return "0";
+	}
+	else {
+		
+		num = num.toString().split('.');
+		var ints = num[0].split('').reverse();
+		for (var out=[],len=ints.length,i=0; i < len; i++) {
+		if (i > 0 && (i % 3) === 0) out.push(',');
+		out.push(ints[i]);
+		}
+		out = out.reverse() && out.join('');
+		if (num.length === 2) out += '.' + num[1];
+		return out;
+	}
 }
 
 /////////////////////////////////
@@ -120,12 +145,12 @@ var countries = d3.select("body")
   .append("g")
     .attr("id", "countries");
 
-//Main Drawing Function
-function refresh() {
+var countryname = {};
+var regfocus = {};
+var exposure = {};
 
-  var countryname = {};
-  var regfocus = {};
-  var exposure = {};
+//Main Drawing Function
+function load() {
 
   //Loading Compliance/Exposure Data
   d3.csv("data.csv", function(csvdata) {
@@ -159,38 +184,100 @@ function refresh() {
             }
           } )
       .append("title")
-        .text(function(d) { return d.properties.name + ' \n\nRegulatory Focus: '+regfocus[d.id+'-'+$( "#year" ).text()]+'\nSovereign Exposure: $'+exposure[d.id+'-'+$( "#year" ).text()] ; });
+      	.attr("class","titles")
+        .text(function(d) { return d.properties.name + ' \n\nRegulatory Focus: '+regfocus[d.id+'-'+$( "#year" ).text()]+'\nSovereign Exposure: $'+formatNumber(exposure[d.id+'-'+$( "#year" ).text()]) ; });
 
-      //Transition
-      world.transition().duration(500)
-        .style("fill", function (d) 
-          {
-            switch($("#metric_dropdown").val())
-            {
-            case "Compliance":
-              return blue_styles[regfocus[d.id+'-'+$( "#year" ).text()]-1]; 
-              break;
-            case "Exposure":
-              return red_styles[quantize(exposure[d.id+'-'+$( "#year" ).text()])]; 
-              break;
-            default:
-              return 0;
-            } 
-          } );
-        
-
-        /*world.enter()
-          .append("svg:rect")
-            .attr("x", 100)
-            .attr("y", 100)
-            .attr("height", 100)
-            .attr("width", 200)
-            .style("fill", "black");*/
+      	var thelegend = countries
+      	  .selectAll("rect")
+      	    .data(d3.range(9));
+      	
+ 		//Draw Legend
+	    thelegend.enter()
+	      .append("rect")
+	   		.attr("class","legend_boxes")
+	        .attr("x", 1100)
+	        .attr("y", function (d) { return 50+d*22; } )
+	        .attr("height", 20)
+	        .attr("width", 20)
+	        .style("fill", function (d) { return blue_styles[d]; } )
+	        .style("stroke-width", ".25px")
+	        .style("stroke", "black");
+	      thelegend.enter()
+	      	.append("text")
+	      		.attr("class","legend_labels")
+	          	.attr("x", 1125)
+	          	.attr("y", function (d) { return 65+d*22; } )
+	          	.style("font-size", 14)
+	          	.style("font-family", "'Helvetica Neue', Helvetica")
+	          	.text(function(d) { return "Level " + (d+1) });
 
     });
   });
 
-} //end function Refresh
+} //end function load
+
+function refresh() {
+	
+	var world = countries.selectAll("path");
+	  
+	//Transition
+	world.transition().duration(500)
+	  .style("fill", function (d)
+	    {
+	      switch($("#metric_dropdown").val())
+	      {
+	      case "Compliance":
+	        return blue_styles[regfocus[d.id+'-'+$( "#year" ).text()]-1]; 
+	        break;
+	      case "Exposure":
+	        return red_styles[quantize(exposure[d.id+'-'+$( "#year" ).text()])]; 
+	        break;
+	      default:
+	        return 0;
+	      } } );
+
+	var titles = countries.selectAll(".titles");
+	
+	titles.transition()
+		.text(function(d) { return d.properties.name + ' \n\nRegulatory Focus: '+regfocus[d.id+'-'+$( "#year" ).text()]+'\nSovereign Exposure: $'+formatNumber(exposure[d.id+'-'+$( "#year" ).text()]) ; });
+	
+
+	var legend_boxes = countries.selectAll(".legend_boxes");
+
+	legend_boxes.transition()
+		.style("fill", function (d) { 
+			switch($("#metric_dropdown").val())
+			{
+			case "Compliance":
+			  return blue_styles[d]; 
+			  break;
+			case "Exposure":
+			  return red_styles[d]; 
+			  break;
+			default:
+			  return 0;
+			}});
+
+		 
+	var legend_labels = countries.selectAll(".legend_labels");
+	
+	legend_labels.transition()
+		.text(function (d) { 
+			switch($("#metric_dropdown").val())
+			{
+			case "Compliance":
+			  return 'Level ' + (d+1); 
+			  break;
+			case "Exposure":
+			  return '$' + formatNumber(10000000*(d+1)) + ' - $' + formatNumber(10000000*(d+2)); 
+			  break;
+			default:
+			  return 0;
+			
+			}
+		 } );
+    
+} // end refresh function
 
 //Listener
 d3.select("#metric_dropdown").on("change", function() {
@@ -215,7 +302,7 @@ $(function() {
 
 
 //Call to the main draw function
-refresh();
+load();
 
     </script><p>
    
