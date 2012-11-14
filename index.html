@@ -85,10 +85,18 @@
 <div id="compliance-header">Compliance Dashboard</div>
         <div class="hint">Switch between the following metrics to compare. </div>
         <div><select id="metric_dropdown">
-          <optgroup label="Metrics">
-            <option value="Compliance">Investment Compliance</option>
-            <option value="Exposure">Sovereign Exposure</option>
+          <optgroup label="Compliance">
+            <option value="conflict">Conflict of Interest</option>
+            <option value="gov">Governance and Oversight</option>
+            <option value="investment">Investment Compliance</option>
+            <option value="ethics">Code of Ethics</option>
+            <option value="sales">Sales and Marketing Practices</option>
+            <option value="composite">Composite</option>
           </optgroup>
+          <optgroup label="Financials">
+            <option value="exposure">Sovereign Exposure</option>
+          </optgroup>
+
         </select></div>
         <div  id="year"></div>
         <div id="slider" style="width: 500px;background-color: transparent;"></div>
@@ -106,6 +114,7 @@ var path = d3.geo.path().projection(projection);
 
 //For buckeeting data into 9 colors
 var quantize = d3.scale.quantile().domain([0, 100000000]).range(d3.range(9));
+var composite_scale = d3.scale.quantile().domain([5,45]).range(d3.range(9));
 
 //Color Styles
 var blue_styles = ["rgb(247,251,255)","rgb(222,235,247)","rgb(198,219,239)","rgb(158,202,225)",
@@ -146,18 +155,29 @@ var countries = d3.select("body")
     .attr("id", "countries");
 
 var countryname = {};
-var regfocus = {};
 var exposure = {};
+var conflict_of_interest = {};
+var investment_compliance = {};
+var governance_and_oversight = {};
+var code_of_ethics = {};
+var sales_and_marketing_practices = {};
+var composite = {};
 
 //Main Drawing Function
 function load() {
 
   //Loading Compliance/Exposure Data
-  d3.csv("data.csv", function(csvdata) {
+  d3.csv("data-20121113.csv", function(csvdata) {
     csvdata.forEach(function(d) {
       countryname[d.ident] = d.country;
-      regfocus[d.ident] = d.regfocus;
       exposure[d.ident] = d.exposure;
+      conflict_of_interest[d.ident] = d.conflict_of_interest;
+      governance_and_oversight[d.ident] = d.governance_and_oversight;
+      investment_compliance[d.ident] = d.investment_compliance;
+      code_of_ethics[d.ident] = d.code_of_ethics;
+      sales_and_marketing_practices[d.ident] = d.sales_and_marketing_practices;
+      composite[d.ident] = d.composite;
+
     });
 
     //Loading world map shape file
@@ -173,11 +193,30 @@ function load() {
           {  
             switch($("#metric_dropdown").val())
             {
-              case "Compliance":
-                return blue_styles[regfocus[d.id+'-'+$( "#year" ).text()]-1]; 
+              case "conflict":
+                return blue_styles[conflict_of_interest[d.id+'_'+$("#year").text()]-1]; 
                 break;
-              case "Exposure":
-                return red_styles[quantize(exposure[d.id+'-'+$( "#year" ).text()])]; 
+              case "gov":
+                return blue_styles[governance_and_oversight[d.id+'_'+$("#year").text()]-1]; 
+                break;
+              case "investment":
+                return blue_styles[investment_compliance[d.id+'_'+$("#year").text()]-1]; 
+                break;
+              case "ethics":
+                return blue_styles[code_of_ethics[d.id+'_'+$("#year").text()]-1]; 
+                break;
+              case "sales":
+                return blue_styles[sales_and_marketing_practices[d.id+'_'+$("#year").text()]-1]; 
+                break;
+              case "composite":
+                return blue_styles[composite_scale(composite[d.id+'_'+$("#year").text()])]; 
+                break;
+
+
+
+
+              case "Financials":
+                return red_styles[quantize(exposure[d.id+'_'+$("#year").text()])]; 
                 break;
               default:
                 return 0;
@@ -185,7 +224,7 @@ function load() {
           } )
       .append("title")
       	.attr("class","titles")
-        .text(function(d) { return d.properties.name + ' \n\nInvestment Compliance: '+regfocus[d.id+'-'+$( "#year" ).text()]+'\nSovereign Exposure: $'+formatNumber(exposure[d.id+'-'+$( "#year" ).text()]) ; });
+        .text(function(d) { return d.properties.name; });
 
       	var thelegend = countries
       	  .selectAll("rect")
@@ -226,11 +265,29 @@ function refresh() {
 	    {
 	      switch($("#metric_dropdown").val())
 	      {
-	      case "Compliance":
-	        return blue_styles[regfocus[d.id+'-'+$( "#year" ).text()]-1]; 
-	        break;
-	      case "Exposure":
-	        return red_styles[quantize(exposure[d.id+'-'+$( "#year" ).text()])]; 
+        case "conflict":
+          return blue_styles[conflict_of_interest[d.id+'_'+$("#year").text()]-1]; 
+          break;
+        case "gov":
+          return blue_styles[governance_and_oversight[d.id+'_'+$("#year").text()]-1]; 
+          break;
+        case "investment":
+          return blue_styles[investment_compliance[d.id+'_'+$("#year").text()]-1]; 
+          break;
+        case "ethics":
+          return blue_styles[code_of_ethics[d.id+'_'+$("#year").text()]-1]; 
+          break;
+        case "sales":
+          return blue_styles[sales_and_marketing_practices[d.id+'_'+$("#year").text()]-1]; 
+          break;
+        case "composite":
+          return blue_styles[composite_scale(composite[d.id+'_'+$("#year").text()])]; 
+          break;
+
+
+
+	      case "exposure":
+	        return red_styles[quantize(exposure[d.id+'_'+$( "#year" ).text()])]; 
 	        break;
 	      default:
 	        return 0;
@@ -239,7 +296,7 @@ function refresh() {
 	var titles = countries.selectAll(".titles");
 	
 	titles.transition()
-		.text(function(d) { return d.properties.name + ' \n\nInvestment Compliance: '+regfocus[d.id+'-'+$( "#year" ).text()]+'\nSovereign Exposure: $'+formatNumber(exposure[d.id+'-'+$( "#year" ).text()]) ; });
+		.text(function(d) { return d.properties.name; });
 	
 
 	var legend_boxes = countries.selectAll(".legend_boxes");
@@ -248,14 +305,13 @@ function refresh() {
 		.style("fill", function (d) { 
 			switch($("#metric_dropdown").val())
 			{
-			case "Compliance":
-			  return blue_styles[d]; 
-			  break;
-			case "Exposure":
+
+
+			case "exposure":
 			  return red_styles[d]; 
 			  break;
 			default:
-			  return 0;
+			  return blue_styles[d]; 
 			}});
 
 		 
@@ -265,14 +321,12 @@ function refresh() {
 		.text(function (d) { 
 			switch($("#metric_dropdown").val())
 			{
-			case "Compliance":
-			  return 'Level ' + (d+1); 
-			  break;
-			case "Exposure":
+
+			case "exposure":
 			  return '$' + formatNumber(10000000*(d+1)) + ' - $' + formatNumber(10000000*(d+2)); 
 			  break;
 			default:
-			  return 0;
+			  return 'Level ' + (d+1);
 			
 			}
 		 } );
@@ -286,8 +340,8 @@ d3.select("#metric_dropdown").on("change", function() {
 
 $(function() {
   $("#slider").slider({
-    value:1995,
-    min: 1995,
+    value:2008,
+    min: 2005,
     max: 2012,
     step: 1,
     width: '500px',
